@@ -1,4 +1,4 @@
-s#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 30 20:08:45 2020
@@ -47,11 +47,11 @@ shift=15 # time window step size in seconds
 drop=0 # drop layer, 1 if you want to include, 0 if not
 large=0.5 # model size (can be 0.5, 1, 2)
 std=0.2 # how wide do you want the gaussian STD to be in seconds?
-plots=0 # do you want plots?
+plots=1 # do you want plots?
 
 # LEAVE THESE
 sr=100 # sample rate in Hz, network was trained on 100Hz data so best keep this as is
-winlen=15 # window length in seconds 
+winlen=15 # window length in seconds
 nwin=int(sr*winlen) # leave this
 nshift=int(sr*shift) # leave this
 epsilon=1e-6 # leave this
@@ -75,7 +75,7 @@ model.load_weights("./models_v2/"+model_save_file)
 
 # LOAD DATA
 day=5
-for sta in ['B079','40','THIS']: 
+for sta in ['B079','40','THIS']:
     print(sta+' '+str(day))
     st=Stream()
     if sta=='40':
@@ -89,12 +89,12 @@ for sta in ['B079','40','THIS']:
     elif sta=="B079":
         st+=read("2018-08-0"+str(day)+".PB."+sta+".EHZ.ms")
         st+=read("2018-08-0"+str(day)+".PB."+sta+".EH1.ms")
-        st+=read("2018-08-0"+str(day)+".PB."+sta+".EH2.ms")    
-    
+        st+=read("2018-08-0"+str(day)+".PB."+sta+".EH2.ms")
+
     # PROCESS DATA
     st.detrend(type='simple')
     st.filter("highpass", freq=1.0, zerophase=True)
-    
+
     # ENFORCE COMPONENTS TO HAVE SAME START AND END TIME
     start=st[0].stats.starttime
     finish=st[0].stats.endtime
@@ -104,12 +104,12 @@ for sta in ['B079','40','THIS']:
         if finish>st[ii].stats.endtime:
             finish=st[ii].stats.endtime
     st.trim(starttime=start, endtime=finish,nearest_sample=1,pad=1,fill_value=0)
-    
+
     # INTERPOLATE IF SR != 100
     for tr in st:
         if sr != tr.stats.sampling_rate:
             tr.interpolate(sampling_rate=sr, starttime=start)
-            
+
     # APPLY CNN TO DATA
     nn=(len(st[0].data)-nwin)//nshift # number of windows
     sdects=[] # intialize detection structure
@@ -128,12 +128,12 @@ for sta in ['B079','40','THIS']:
     # make s predictions
     stmp=model.predict(sav_data)
     stmp=stmp.ravel()
-    spk=find_peaks(stmp, height=thresh, distance=200)    
+    spk=find_peaks(stmp, height=thresh, distance=200)
     sdects=np.hstack((spk[0].reshape(-1,1)/sr,spk[1]['peak_heights'].reshape(-1,1)))
     codestop=datetime.datetime.now()
-    
+
     # SAVE DETECTION FILES
-    dects=np.asarray(sdects)            
+    dects=np.asarray(sdects)
     file='picks-'+str(drop)+'-'+str(large)+'-'+str(std)+'_'+sta+'-'+str(2018)+'-'+str(8).zfill(2)+'-'+str(day).zfill(2)+'.pkl'
     with open(file, "wb") as fp:   #Pickling
         pickle.dump(dects, fp)

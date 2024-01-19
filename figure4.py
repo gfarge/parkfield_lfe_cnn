@@ -26,7 +26,7 @@ day=5 # August 5th is the day
 thresh=0.1 # decision threshold
 
 fig = plt.figure(constrained_layout=True,figsize=(18,12))
-gs = fig.add_gridspec(3, 6)   
+gs = fig.add_gridspec(3, 6)
 
 # make plots
 label='ABCDEFGHIJ'
@@ -37,26 +37,26 @@ for jj, sta in enumerate(['THIS','40','B079']): #,'B901']):
     # load picks
     file='picks-'+str(drop)+'-'+str(large)+'-'+str(std)+'_'+sta+'-'+str(2018)+'-'+str(8).zfill(2)+'-'+str(day).zfill(2)+'.pkl'
     picks=pickle.load( open(file, "rb" ) )
-    
+
     # load data
     st=Stream()
     if sta=='40':
-        st=read("/Users/amt/Documents/parkfield_nodal_deployment/data/1B.40..DP2.2018-08-0"+str(day)+"-00-00-00.ms")
-        st+=read("/Users/amt/Documents/parkfield_nodal_deployment/data/1B.40..DP1.2018-08-0"+str(day)+"-00-00-00.ms")
+        st=read("1B.40..DP2.2018-08-0"+str(day)+"-00-00-00.ms")
+        st+=read("1B.40..DP1.2018-08-0"+str(day)+"-00-00-00.ms")
     elif sta=='B079' or sta=='B901':
-        st=read("/Users/amt/Documents/parkfield_nodal_deployment/data/2018-08-0"+str(day)+".PB."+sta+".EH1.ms")
-        st+=read("/Users/amt/Documents/parkfield_nodal_deployment/data/2018-08-0"+str(day)+".PB."+sta+".EH2.ms")
+        st=read("2018-08-0"+str(day)+".PB."+sta+".EH1.ms")
+        st+=read("2018-08-0"+str(day)+".PB."+sta+".EH2.ms")
     else:
-        st=read("/Users/amt/Documents/parkfield_nodal_deployment/data/2018-08-0"+str(day)+".BK."+sta+".HHE.ms")
-        st+=read("/Users/amt/Documents/parkfield_nodal_deployment/data/2018-08-0"+str(day)+".BK."+sta+".HHN.ms")
+        st=read("2018-08-0"+str(day)+".BK."+sta+".HHE.ms")
+        st+=read("2018-08-0"+str(day)+".BK."+sta+".HHN.ms")
 
-    st.filter("highpass", freq=1.0, zerophase=True) 
+    st.filter("highpass", freq=1.0, zerophase=True)
     t=np.arange(st[0].stats.npts)*st[0].stats.delta
     data1=st[0].data
     data2=st[1].data
-    
+
     ax0=fig.add_subplot(gs[jj, 0:4])
-    srange=24300,24900 
+    srange=24300,24900
     picks_small=picks[(picks[:,0]>srange[0]) & (picks[:,0]<=srange[1])]
     inds=np.where((t>=srange[0]) & (t<srange[1]))[0]
     ax0.plot(t[inds],data1[inds]/(fac*np.median(np.abs(data1[inds])))+1,color=(0.5,0.5,0.5))
@@ -73,15 +73,15 @@ for jj, sta in enumerate(['THIS','40','B079']): #,'B901']):
     ax0.tick_params(axis="x", labelsize=12)
     ax0.set_title(sta,fontsize=14)
     ax0.text(srange[0]+4,1.5,label[int(2*jj)],fontsize=28,fontweight='bold')
-    
+
     # Create a Rectangle patch
     rect = patches.Rectangle((24825,-2.1), 8, 4.2, linewidth=2, edgecolor='k', facecolor='none')
-    
+
     # Add the patch to the Axes
     ax0.add_patch(rect)
-    
+
     #-------- PANEL C
-    
+
     ax2=fig.add_subplot(gs[jj, 4:])
     sranges=24825,24833
     # bpinds=np.where((bpt>=srange[0]) & (bpt<=srange[1]))[0]
@@ -105,10 +105,10 @@ for jj, sta in enumerate(['THIS','40','B079']): #,'B901']):
     ax2.xaxis.set_major_locator(plt.MaxNLocator(4))
 
 ax0.set_xlabel("Second of day on Aug. 5 2018",fontsize=14,labelpad=15)
-cbaxes = fig.add_axes([0.675, 0.06, 0.2, 0.02]) 
+cbaxes = fig.add_axes([0.675, 0.06, 0.2, 0.02])
 cb = plt.colorbar(cx1, cax = cbaxes, orientation="horizontal")
 cb.set_label(label='CNN Amplitude', size='large')
-cb.patch.set_facecolor((0.2, 0.2, 0.2, 1.0))
+#cb.patch.set_facecolor((0.2, 0.2, 0.2, 1.0))
 cb.outline.set_linewidth(2)
 cb.ax.tick_params(labelsize=12)
 
